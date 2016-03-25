@@ -1,0 +1,21 @@
+[root]
+name = "chatde-rs"
+version = "0.1.0"
+dependencies = [
+ "delta-l 2.4.0 (git+https://github.com/LFalch/delta-l?tag=v2.4.0)",
+ "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "delta-l"
+version = "2.4.0"
+source = "git+https://github.com/LFalch/delta-l?tag=v2.4.0#7ba6ecae51190947a1869b735242dc2d5f49acb5"
+dependencies = [
+ "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "getopts"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
