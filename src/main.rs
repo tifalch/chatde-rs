@@ -28,18 +28,21 @@ fn main() {
 
     let matches = options.parse(env::args().skip(1)).unwrap();
 
-    let use_colour   =  matches.opt_present("color");
-    let use_compress =  matches.opt_present("gzip");
-    let use_checksum = !matches.opt_present("checksum");
     let pass = matches.opt_str("passphrase").unwrap_or("".to_owned());
+
+    let chatter = Chatter{flags: Flags{
+        use_colour  :  matches.opt_present("color"),
+        use_compress:  matches.opt_present("gzip"),
+        use_checksum: !matches.opt_present("checksum")
+    }};
 
     let args = matches.free;
 
-    let chatter = Chatter{flags: Flags{
-        use_colour: use_colour,
-        use_compress: use_compress,
-        use_checksum: use_checksum
-    }};
+    if chatter.flags.use_compress{
+        chatter.set_colour(YellowSlashBrown).unwrap_or(());
+        println!("WARN: Compression hasn't been implemented yet! See issue #1");
+        chatter.reset_colour().unwrap_or(());
+    }
 
     if args.len() == 1{
         let ip = utils::parse_addr(&args[0]).unwrap();
@@ -47,7 +50,7 @@ fn main() {
         println!("{}", HELLO);
         match chatter.chat_mode(ip, &pass){
             Ok(()) => {
-                chatter.set_colour(YellowSlashBrown).unwrap_or(());
+                chatter.set_colour(Blue).unwrap_or(());
                 println!("BYE!");
                 chatter.reset_colour().unwrap_or(());
             },
