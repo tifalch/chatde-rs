@@ -27,7 +27,10 @@ fn main() {
     options.optflag("D", "debug", "Enable debug info");
     options.optopt("p", "passphrase", "Use a passphrase", "PASSPHRASE");
 
-    let matches = options.parse(env::args().skip(1)).unwrap();
+    let matches = match options.parse(env::args().skip(1)){
+        Ok(m) => m,
+        Err(_) => return incorrect_usage()
+    };
 
     let pass = matches.opt_str("passphrase").unwrap_or("".to_owned());
 
@@ -56,20 +59,24 @@ fn main() {
                 println!("BYE!");
                 chatter.reset_colour().unwrap_or(());
             },
-            Err(e) => return handle_error(chatter, e)
+            Err(e) => handle_error(chatter, e)
         }
     }else{
-        chatter.set_colour(Red).unwrap_or(());
-        println!("Incorrect uasge!\n");
-        print!("{}", USAGE);
-        chatter.reset_colour().unwrap_or(());
+        incorrect_usage();
     }
 }
 
-fn handle_error(chatter: Chatter, err: io::Error){
+fn incorrect_usage(){
+    println!("Incorrect uasge!\n");
+    print!("{}", USAGE);
+}
+
+fn handle_error(chatter: Chatter, err: io::Error) -> !{
     chatter.set_colour(Red).unwrap_or(());
     match err.kind(){
         _ => println!("Unexpected error occured: {:?}", err)
     }
     chatter.reset_colour().unwrap_or(());
+
+    std::process::exit(1);
 }
