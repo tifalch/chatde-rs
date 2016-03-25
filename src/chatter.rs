@@ -66,11 +66,19 @@ impl Chatter{
             }
 
             if let Some('§') = msg.chars().nth(0){
-                match msg{
-                    "§bye"|"§quit" => {
+                let cmd = msg[2..].split(' ').collect::<Vec<_>>();
+
+                match cmd[0]{
+                    "bye"|"quit" => {
                         break 'chat
                     },
-                    _ => continue 'chat
+                    _ => {
+                        try!(self.set_colour(Red));
+                        println!("Unknown command!");
+                        try!(self.reset_colour());
+
+                        continue 'chat
+                    }
                 }
             }
 
