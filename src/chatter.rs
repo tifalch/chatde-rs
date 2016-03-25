@@ -1,5 +1,5 @@
 use std::net::SocketAddr;
-use std::io::{Read, Write, BufRead, BufReader, stdout, stdin};
+use std::io::{Result as IOResult, Read, Write, BufRead, BufReader, stdout, stdin};
 
 use delta_l::DeltaL;
 
@@ -30,63 +30,66 @@ pub struct Chatter{
 }
 
 impl Chatter{
-    pub fn reset_colour(&self) {
+    pub fn reset_colour(&self) -> IOResult<()>{
         if self.flags.use_colour{
-            stdout().write_all(b"\x1b[0m").unwrap()
+            stdout().write_all(b"\x1b[0m")
+        }else{
+            Ok(())
         }
     }
 
-    pub fn set_colour(&self, c: Colour) {
+    pub fn set_colour(&self, c: Colour) -> IOResult<()>{
         if self.flags.use_colour{
-            stdout().write_all(format!("\x1b[{}m", c as u8).as_bytes()).unwrap()
+            stdout().write_all(format!("\x1b[{}m", c as u8).as_bytes())
+        }else{
+            Ok(())
         }
     }
 
-    pub fn chat_mode(&self, _ip: SocketAddr, pass: &str){
+    pub fn chat_mode(&self, _ip: SocketAddr, pass: &str) -> IOResult<()>{
         let mut buf = BufReader::new(stdin());
 
         'chat: loop{
-            self.set_colour(Green);
+            try!(self.set_colour(Green));
             print!(" Δ ");
-            stdout().flush().unwrap();
+            try!(stdout().flush());
 
             let mut msg = String::new();
-            buf.read_line(&mut msg).unwrap();
+            try!(buf.read_line(&mut msg));
             let msg = msg.trim();
 
-            self.reset_colour();
+            try!(self.reset_colour());
 
             if msg.len() == 0{
                 continue 'chat
             }
 
-            if msg.chars().nth(0).unwrap() == '§'{
+            if let Some('§') = msg.chars().nth(0){
                 match msg{
                     "§bye"|"§quit" => {
-                        self.set_colour(YellowSlashBrown);
-                        println!("BYE!");
-
                         break 'chat
                     },
                     _ => continue 'chat
                 }
             }
 
-            self.send(msg, pass)
+            try!(self.send(msg, pass))
         }
+
+        Ok(())
     }
 
-    pub fn send(&self, msg: &str, pass: &str){
+    pub fn send(&self, msg: &str, pass: &str) -> IOResult<()>{
         let mut dl = DeltaL::new();
         if pass != ""{
             dl.set_passphrase(pass);
         }
-        self.set_colour(Cyan);
+        try!(self.set_colour(Cyan));
 
         let mut buf = Vec::new();
 
         println!("--- begins encrypted data ---");
-        dl.encode(&mut msg.as_bytes(), &mut buf, self.flags.use_checksum).unwrap();
+        try!(dl.encode(&mut msg.as_bytes(), &mut buf, self.flags.use_checksum));
 
         for i in 0.. {
             let t = i * 12;
@@ -101,6 +104,6 @@ impl Chatter{
 
         }
         println!("--- end of encrypted data ---");
-        self.reset_colour();
+        self.reset_colour()
     }
 }
