@@ -24,6 +24,7 @@ fn main() {
     options.optflag("", "color", "Use colour.");
     options.optflag("z", "gzip", "Use compression.");
     options.optflag("c", "checksum", "Don't use checksum.");
+    options.optflag("D", "debug", "Enable debug info");
     options.optopt("p", "passphrase", "Use a passphrase", "PASSPHRASE");
 
     let matches = options.parse(env::args().skip(1)).unwrap();
@@ -33,7 +34,8 @@ fn main() {
     let chatter = Chatter{flags: Flags{
         use_colour  :  matches.opt_present("color"),
         use_compress:  matches.opt_present("gzip"),
-        use_checksum: !matches.opt_present("checksum")
+        use_checksum: !matches.opt_present("checksum"),
+        debug       :  matches.opt_present("debug"),
     }};
 
     let args = matches.free;

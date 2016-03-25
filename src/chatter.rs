@@ -22,7 +22,8 @@ use self::Colour::*;
 pub struct Flags{
     pub use_colour: bool,
     pub use_compress: bool,
-    pub use_checksum: bool
+    pub use_checksum: bool,
+    pub debug: bool,
 }
 
 pub struct Chatter{
@@ -84,26 +85,30 @@ impl Chatter{
         if pass != ""{
             dl.set_passphrase(pass);
         }
-        try!(self.set_colour(Cyan));
 
         let mut buf = Vec::new();
 
-        println!("--- begins encrypted data ---");
         try!(dl.encode(&mut msg.as_bytes(), &mut buf, self.flags.use_checksum));
 
-        for i in 0.. {
-            let t = i * 12;
+        if self.flags.debug {
+            try!(self.set_colour(Cyan));
 
-            if t >= buf.len(){
-                break
+            println!("--- begins encrypted data ---");
+
+            for i in 0.. {
+                let t = i * 12;
+
+                if t >= buf.len(){
+                    break
+                }
+
+                let size = ::std::cmp::min(12, buf.len() - t);
+
+                println!("[{:02X}] ({:02}) [{}]", i, size, ::utils::hex_string(&buf[t..t+size]));
             }
+            println!("--- end of encrypted data ---");
 
-            let size = ::std::cmp::min(12, buf.len() - t);
-
-            println!("[{:02X}] ({:02}) [{}]", i, size, ::utils::hex_string(&buf[t..t+size]));
-
-        }
-        println!("--- end of encrypted data ---");
-        self.reset_colour()
+            self.reset_colour()
+        }else{Ok(())}
     }
 }
