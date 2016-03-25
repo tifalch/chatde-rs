@@ -86,7 +86,7 @@ impl Chatter{
         let mut buf = Vec::new();
 
         println!("--- begins encrypted data ---");
-        dl.encode(&mut msg.as_bytes(), &mut buf, true).unwrap();
+        dl.encode(&mut msg.as_bytes(), &mut buf, self.flags.use_checksum).unwrap();
 
         for i in 0.. {
             let t = i * 12;
