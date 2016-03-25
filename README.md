@@ -22,6 +22,7 @@ Options:
     -D,--debug          Enables debug output
 
     -p,--passphrase     Parses a passphrase to be used for encryption
+                        -- to be deprecated as well
 ```
 
 ### Commands
