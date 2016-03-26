@@ -30,15 +30,17 @@ Options:
 ```
 §bye, §quit
       quit chatde
+§ls
+    lists the current directory
+§cd <dir>
+    changes current directory
+§pwd, §cd
+    prints current directory
 ```
 #### To be added
 ```
 §file <file>
     sends an encrypted file
-§ls
-    lists the current directory
-§cd <dir>
-    changes current directory
 ```
 
 ## Encryption Algorithm

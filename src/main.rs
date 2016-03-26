@@ -34,12 +34,15 @@ fn main() {
 
     let pass = matches.opt_str("passphrase").unwrap_or("".to_owned());
 
-    let chatter = Chatter{flags: Flags{
-        use_colour  :  matches.opt_present("color"),
-        use_compress:  matches.opt_present("gzip"),
-        use_checksum: !matches.opt_present("checksum"),
-        debug       :  matches.opt_present("debug"),
-    }};
+    let mut chatter = Chatter{
+        working_dir: env::current_dir().unwrap(),
+        flags: Flags{
+            use_colour  :  matches.opt_present("color"),
+            use_compress:  matches.opt_present("gzip"),
+            use_checksum: !matches.opt_present("checksum"),
+            debug       :  matches.opt_present("debug"),
+        }
+    };
 
     let args = matches.free;
 
