@@ -1,5 +1,7 @@
 use std::net::SocketAddr;
 use std::io::{Result as IOResult, Read, Write, BufRead, BufReader, stdout, stdin};
+use std::path::PathBuf;
+use std::fs;
 
 use delta_l::DeltaL;
 
@@ -27,7 +29,8 @@ pub struct Flags{
 }
 
 pub struct Chatter{
-    pub flags: Flags
+    pub flags: Flags,
+    pub working_dir: PathBuf,
 }
 
 impl Chatter{
@@ -47,7 +50,7 @@ impl Chatter{
         }
     }
 
-    pub fn chat_mode(&self, _ip: SocketAddr, pass: &str) -> IOResult<()>{
+    pub fn chat_mode(&mut self, _ip: SocketAddr, pass: &str) -> IOResult<()>{
         let mut buf = BufReader::new(stdin());
 
         'chat: loop{
@@ -72,14 +75,41 @@ impl Chatter{
                     "bye"|"quit" => {
                         break 'chat
                     },
+                    "ls" => {
+                        try!(self.set_colour(White));
+                        for entry in try!(fs::read_dir(&self.working_dir)){
+                            let entry = try!(entry);
+
+                            println!("{}", entry.file_name().to_string_lossy())
+                        }
+                        try!(self.reset_colour());
+                    },
+                    "cd" if cmd.len() > 1 => {
+                        let mut temp = self.working_dir.clone();
+                        temp.push(cmd[1]);
+
+                        if temp.is_dir() && temp.exists(){
+                            self.working_dir = try!(fs::canonicalize(temp));
+                        }else{
+                            try!(self.set_colour(Red));
+                            println!("Folder doesn't exist");
+                            try!(self.reset_colour());
+                        }
+
+                    },
+                    "cd"|"pwd" => {
+                        try!(self.set_colour(White));
+                        println!("{}", self.working_dir.display());
+                        try!(self.reset_colour());
+                    },
                     _ => {
                         try!(self.set_colour(Red));
                         println!("Unknown command!");
                         try!(self.reset_colour());
-
-                        continue 'chat
                     }
                 }
+
+                continue 'chat
             }
 
             try!(self.send(msg, pass))
