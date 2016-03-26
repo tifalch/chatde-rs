@@ -12,7 +12,7 @@ use std::io;
 
 use getopts::Options;
 
-const HELLO: &'static str = "Welcome to gochatde an encrypted terminal chat client using delta-l encryption.";
+const HELLO: &'static str = "Welcome to chatde: An encrypted terminal chat client using delta-l encryption.";
 const USAGE: &'static str = r"
 USAGE:
     chatde-rs [OPTIONS] ip[:PORT]
