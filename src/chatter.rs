@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::fs::File;
 use std::io::{Result as IOResult, Read, Write, BufRead, BufReader, stdout, stdin};
 use std::path::PathBuf;
 use std::fs;
@@ -102,6 +103,28 @@ impl Chatter{
                         println!("{}", self.working_dir.display());
                         try!(self.reset_colour());
                     },
+                    "file" => {
+                        if cmd.len() > 1 {
+                            let file_path = self.working_dir.join(cmd[1]);
+
+                            if file_path.exists() && file_path.is_file() {
+                                let mut file = try!(File::open(file_path));
+                                let mut buf = Vec::new();
+                                try!(file.read_to_end(&mut buf));
+
+                                try!(self.send(&*buf, pass));
+                                continue 'chat
+                            }else{
+                                try!(self.set_colour(Red));
+                                println!("No such file!");
+                                try!(self.reset_colour());
+                            }
+                        }else{
+                            try!(self.set_colour(Red));
+                            println!("Please specify a file to send");
+                            try!(self.reset_colour());
+                        }
+                    },
                     _ => {
                         try!(self.set_colour(Red));
                         println!("Unknown command!");
@@ -112,13 +135,13 @@ impl Chatter{
                 continue 'chat
             }
 
-            try!(self.send(msg, pass))
+            try!(self.send(msg.as_bytes(), pass))
         }
 
         Ok(())
     }
 
-    pub fn send(&self, msg: &str, pass: &str) -> IOResult<()>{
+    pub fn send(&self, mut bytes: &[u8], pass: &str) -> IOResult<()>{
         let mut dl = DeltaL::new();
         if pass != ""{
             dl.set_passphrase(pass);
@@ -126,7 +149,7 @@ impl Chatter{
 
         let mut buf = Vec::new();
 
-        try!(dl.encode(&mut msg.as_bytes(), &mut buf, self.flags.use_checksum));
+        try!(dl.encode(&mut bytes, &mut buf, self.flags.use_checksum));
 
         if self.flags.debug {
             try!(self.set_colour(Cyan));

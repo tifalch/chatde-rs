@@ -36,9 +36,6 @@ Options:
     changes current directory
 §pwd, §cd
     prints current directory
-```
-#### To be added
-```
 §file <file>
     sends an encrypted file
 ```
